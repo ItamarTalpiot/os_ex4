@@ -122,7 +122,7 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
 
 int get_num_of_frames(word_t curr_frame_index, int height)
 {
-    if (height == TABLES_DEPTH || curr_frame_index == 0)
+    if (height == TABLES_DEPTH)
     {
         return 1;
     }
@@ -178,7 +178,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     std::cout << "num frames " << num_frames  << "    NUM_FRAMES: " << NUM_FRAMES << std::endl;
     if (num_frames+1 < NUM_FRAMES) // todo: check why not add + 1
     {
-        found_frame = num_frames+1;
+        found_frame = num_frames + 1;
         std::cout << "found second condition" << found_frame << std::endl;
 
         if (is_next_data)
