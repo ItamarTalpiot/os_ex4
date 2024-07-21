@@ -47,6 +47,22 @@ void VMinitialize()
     }
 }
 
+bool is_there_only_zero_in_frame(word_t frame_index){
+  word_t var;
+  for(int i = 0; i < PAGE_SIZE; i++){
+    PMread (frame_index * PAGE_SIZE + i, &var);
+    if(var != 0){
+      return false;
+    }
+  }
+  return true;
+}
+
+void put_in_frame_zeros(word_t frame_index){
+  for(int i = 0; i < PAGE_SIZE; i++){
+      PMwrite (frame_index * PAGE_SIZE + i, 0);
+  }
+}
 
 
 word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evict){
