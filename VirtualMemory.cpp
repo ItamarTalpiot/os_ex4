@@ -4,5 +4,8 @@
 
 void VMinitialize()
 {
-    //PMwrite()
+    for(int i =0; i < PAGE_SIZE; i++)
+    {
+        PMwrite(i, 0);
+    }
 }
