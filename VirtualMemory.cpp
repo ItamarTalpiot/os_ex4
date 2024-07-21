@@ -113,9 +113,9 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     word_t found_frame_index = 0;
     for (int i = 0; i < PAGE_SIZE; i++)
     {
-        curr_p = (curr_p << OFFSET_WIDTH) + i;
+        std::cout << curr_p << std::endl;
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
-        get_frame_max_point(frame_not_to_evict, pointing_index, page_swapped_in, curr_p, frame_res, res_p, max_val, father, father_address_res, i, height + 1);
+        get_frame_max_point(frame_not_to_evict, pointing_index, page_swapped_in, (curr_p << OFFSET_WIDTH) + i, frame_res, res_p, max_val, father, father_address_res, i, height + 1);
     }
 }
 
