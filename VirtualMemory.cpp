@@ -15,6 +15,7 @@ void print_bytes(uint64_t virtualAddress) {
 
 uint64_t get_table_value(uint64_t virtualAddress, int table_index)
 {
+
     uint64_t mask = (1ULL << OFFSET_WIDTH) - 1; // Create a mask with the last OFFSET_WIDTH bits set to 1
     uint64_t shifted_addr = (virtualAddress >> OFFSET_WIDTH * (TABLES_DEPTH - table_index));
 //    std::cout << "shited ";
@@ -35,7 +36,7 @@ uint64_t generateBitPattern(int offsetWidth) {
 
 void VMinitialize()
 {
-    for(int i =0; i < PAGE_SIZE; i++)
+    for(int i = 0; i < PAGE_SIZE; i++)
     {
         PMwrite(i, 0);
     }
@@ -43,9 +44,46 @@ void VMinitialize()
 
 
 
+word_t get_frame(){
+
+}
+
+word_t get_physical_page(uint64_t virtualAddress){
+  uint64_t cur_part_of_vir_addr;
+  word_t cur_addr;
+  word_t last_addr = 0;
+  for(int i = 0; i < TABLES_DEPTH; i++){
+      cur_part_of_vir_addr = get_table_value (virtualAddress, i);
+      PMread (cur_part_of_vir_addr, &cur_addr);
+      if(cur_addr == 0){
+          cur_addr = get_frame(i == TABLES_DEPTH - 1 ? get_frame_index(virtualAddress):-1, last_addr);
+          PMwrite(last_addr * PAGE_SIZE + cur_part_of_vir_addr, cur_addr);
+        }
+      last_addr = cur_addr;
+  }
+  return cur_addr;
+}
+
 int VMwrite(uint64_t virtualAddress, word_t value)
 {
+  word_t cur_addr = get_physical_page(virtualAddress);
+  PMwrite(cur_addr * PAGE_SIZE + get_table_value (virtualAddress, TABLES_DEPTH), value);
+  return 1;
+}
 
+
+/* reads a word from the given virtual address
+ * and puts its content in *value.
+ *
+ * returns 1 on success.
+ * returns 0 on failure (if the address cannot be mapped to a physical
+ * address for any reason)
+ */
+int VMread(uint64_t virtualAddress, word_t* value){
+
+  word_t cur_addr = get_physical_page (virtualAddress);
+  PMread (cur_addr * PAGE_SIZE + get_table_value (virtualAddress, TABLES_DEPTH), value);
+  return 1;
 }
 
 
