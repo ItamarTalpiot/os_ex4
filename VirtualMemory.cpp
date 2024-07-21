@@ -175,7 +175,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 
     //second option
     int num_frames = get_num_of_frames(0, 0);
-    std::cout << "num frames " << num_frames << std::endl;
+    std::cout << "num frames " << num_frames  << "    NUM_FRAMES: " << NUM_FRAMES << std::endl;
     if (num_frames + 1 < NUM_FRAMES)
     {
         std::cout << "found second condition" << std::endl;
@@ -200,6 +200,8 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     uint64_t father;
     uint64_t res_p = 0;
     get_frame_max_point(frame_not_to_evict, 0, page_index, 0, &frame_res, &res_p, &max_val, &father, &father_res, 0, 0);
+
+    std::cout << "frame res: " << frame_res << " res_p: " << res_p << " father res: " << father_res << std::endl;
     PMevict(frame_res, res_p);
 
 
