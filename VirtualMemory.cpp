@@ -113,7 +113,7 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     word_t found_frame_index = 0;
     for (int i = 0; i < PAGE_SIZE; i++)
     {
-        std::cout << curr_p << std::endl;
+//        std::cout << curr_p << std::endl;
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
         get_frame_max_point(frame_not_to_evict, pointing_index, page_swapped_in, (curr_p << OFFSET_WIDTH) + i, frame_res, res_p, max_val, father, father_address_res, i, height + 1);
     }
@@ -122,13 +122,13 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
 
 int get_num_of_frames(word_t curr_frame_index, int height)
 {
+    if (height == TABLES_DEPTH || curr_frame_index == 0)
+    {
+        return 1;
+    }
     if (is_there_only_zero_in_frame(curr_frame_index))
     {
         return 0;
-    }
-    else if (height == TABLES_DEPTH)
-    {
-        return 1;
     }
 
     word_t pointing_index;
@@ -144,7 +144,7 @@ int get_num_of_frames(word_t curr_frame_index, int height)
         int res = get_num_of_frames(pointing_index, height + 1);
         if (res == 0)
         {
-            break;
+            continue;
         }
 
         total_num += res;
@@ -176,10 +176,10 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     //second option
     int num_frames = get_num_of_frames(0, 0);
     std::cout << "num frames " << num_frames  << "    NUM_FRAMES: " << NUM_FRAMES << std::endl;
-    if (num_frames + 1 < NUM_FRAMES)
+    if (num_frames+1 < NUM_FRAMES) // todo: check why not add + 1
     {
-        std::cout << "found second condition" << std::endl;
-        found_frame = num_frames + 1;
+        found_frame = num_frames+1;
+        std::cout << "found second condition" << found_frame << std::endl;
 
         if (is_next_data)
         {
@@ -223,10 +223,11 @@ word_t get_physical_page(uint64_t virtualAddress){
   word_t cur_addr;
   word_t last_addr = 0;
   for(int i = 0; i < TABLES_DEPTH; i++){
-//      printRam();
+
       cur_part_of_vir_addr = get_table_value (virtualAddress, i);
       PMread (last_addr * PAGE_SIZE + cur_part_of_vir_addr, &cur_addr);
       if(cur_addr == 0){
+//          printRam();
           cur_addr = get_frame(i == TABLES_DEPTH - 1 ? 1:0, get_page_index (virtualAddress), last_addr);
           PMwrite(last_addr * PAGE_SIZE + cur_part_of_vir_addr, cur_addr);
 
@@ -259,16 +260,12 @@ int VMread(uint64_t virtualAddress, word_t* value){
 }
 
 
-//int main(int argc, char **argv) {
-//    uint64_t n1 = 100 + (uint64_t)(1ULL << 18);
-//    print_bytes(n1);
-//    std:: cout << "Table depth " << TABLES_DEPTH << std::endl;
-//    std:: cout << "without offset" << get_page_index (n1) << std::endl;
-//    std:: cout << "table_index 0 of" << n1 << ": " << get_table_value(n1, 0) << std::endl;
-//    std:: cout << "table_index 1 of" << n1 << ": " << get_table_value(n1, 1) << std::endl;
-//    std:: cout << "table_index 2 of" << n1 << ": " << get_table_value(n1, 2) << std::endl;
-//    std:: cout << "table_index 3 of" << n1 << ": " << get_table_value(n1, 3) << std::endl;
-//    std:: cout << "table_index 4 of" << n1 << ": " << get_table_value(n1, 4) << std::endl;
-//
-//    return 0;
-//}
+int main(int argc, char **argv)
+{
+    VMinitialize();  for(uint64_t i = 0; i < 4; i++){
+        printf("writing i = %llu\n", (long long int)i);
+        VMwrite(i*PAGE_SIZE, i);
+        int num_of_frames = get_num_of_frames (0, 0);
+        printRam();
+        printf("current num of frames = %d\n", num_of_frames);  }
+}
