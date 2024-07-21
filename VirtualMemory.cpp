@@ -107,10 +107,29 @@ int get_num_of_frames(word_t curr_frame_index, int height)
 
 
 word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evict){
+    //first option
     word_t found_frame = get_frame_dfs(frame_not_to_evict, 0, 0);
 
     if (found_frame != 0)
     {
+        if (is_next_data)
+        {
+            PMrestore(found_frame, page_index);
+        }
+        else
+        {
+            put_in_frame_zeros(found_frame);
+        }
+
+        return found_frame;
+    }
+
+    //second option
+    int num_frames = get_num_of_frames(0, 0);
+    if (num_frames + 1 < NUM_FRAMES)
+    {
+        found_frame = num_frames + 1;
+
         if (is_next_data)
         {
             PMrestore(found_frame, page_index);
