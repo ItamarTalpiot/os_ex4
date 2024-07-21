@@ -38,29 +38,28 @@ uint64_t generateBitPattern(int offsetWidth) {
 }
 
 
+void put_in_frame_zeros(word_t frame_index){
+    for(int i = 0; i < PAGE_SIZE; i++){
+        PMwrite (frame_index * PAGE_SIZE + i, 0);
+    }
+}
+
+
 void VMinitialize()
 {
-    for(int i = 0; i < PAGE_SIZE; i++)
-    {
-        PMwrite(i, 0);
-    }
+    put_in_frame_zeros(0);
 }
 
 bool is_there_only_zero_in_frame(word_t frame_index){
   word_t var;
   for(int i = 0; i < PAGE_SIZE; i++){
     PMread (frame_index * PAGE_SIZE + i, &var);
+    std::cout << "var" << var << std::endl;
     if(var != 0){
       return false;
     }
   }
   return true;
-}
-
-void put_in_frame_zeros(word_t frame_index){
-  for(int i = 0; i < PAGE_SIZE; i++){
-      PMwrite (frame_index * PAGE_SIZE + i, 0);
-  }
 }
 
 
@@ -124,7 +123,11 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
 
 int get_num_of_frames(word_t curr_frame_index, int height)
 {
-    if (height == TABLES_DEPTH)
+    if (is_there_only_zero_in_frame(0))
+    {
+        return 0;
+    }
+    else if (height == TABLES_DEPTH)
     {
         return 1;
     }
@@ -133,8 +136,9 @@ int get_num_of_frames(word_t curr_frame_index, int height)
     int total_num = 0;
     for (int i = 0; i < PAGE_SIZE; i++)
     {
-        get_page_index(curr_frame_index*PAGE_SIZE + i);
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
+//        std::cout << pointing_index << std::endl;
+        std::cout << is_there_only_zero_in_frame(0) << std::endl;
         total_num += get_num_of_frames(pointing_index, height + 1);
     }
 
@@ -148,6 +152,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 
     if (found_frame != 0)
     {
+        std::cout << "found first condition" << std::endl;
         if (is_next_data)
         {
             PMrestore(found_frame, page_index);
@@ -162,8 +167,10 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 
     //second option
     int num_frames = get_num_of_frames(0, 0);
+    std::cout << "num frames " << num_frames << std::endl;
     if (num_frames + 1 < NUM_FRAMES)
     {
+        std::cout << "found second condition" << std::endl;
         found_frame = num_frames + 1;
 
         if (is_next_data)
@@ -178,6 +185,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
         return found_frame;
     }
 
+    std::cout << "finding third condition" << std::endl;
     uint64_t max_val = 0;
     word_t frame_res;
     uint64_t father_res;
@@ -218,6 +226,7 @@ word_t get_physical_page(uint64_t virtualAddress){
 
 int VMwrite(uint64_t virtualAddress, word_t value)
 {
+    printRam();
   word_t cur_addr = get_physical_page(virtualAddress);
   PMwrite(cur_addr * PAGE_SIZE + get_table_value (virtualAddress, TABLES_DEPTH), value);
   return 1;
