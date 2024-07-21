@@ -23,7 +23,7 @@ uint64_t get_table_value(uint64_t virtualAddress, int table_index)
     return  shifted_addr & mask; // Return the last OFFSET_WIDTH bits of the virtualAddress
 }
 
-uint64_t get_frame_index(uint64_t virtualAddress)
+uint64_t get_page_index(uint64_t virtualAddress)
 {
     return  virtualAddress >> OFFSET_WIDTH; // Return the last OFFSET_WIDTH bits of the virtualAddress
 }
@@ -49,7 +49,7 @@ void VMinitialize()
 
 
 
-word_t get_frame(){
+word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evict){
 
 }
 
@@ -61,7 +61,7 @@ word_t get_physical_page(uint64_t virtualAddress){
       cur_part_of_vir_addr = get_table_value (virtualAddress, i);
       PMread (cur_part_of_vir_addr, &cur_addr);
       if(cur_addr == 0){
-          cur_addr = get_frame(i == TABLES_DEPTH - 1 ? get_frame_index(virtualAddress):-1, last_addr);
+          cur_addr = get_frame(i == TABLES_DEPTH - 1 ? 1:0, get_page_index (virtualAddress), last_addr);
           PMwrite(last_addr * PAGE_SIZE + cur_part_of_vir_addr, cur_addr);
         }
       last_addr = cur_addr;
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     uint64_t n1 = 100 + (uint64_t)(1ULL << 18);
     print_bytes(n1);
     std:: cout << "Table depth " << TABLES_DEPTH << std::endl;
-    std:: cout << "without offset" << get_frame_index(n1) << std::endl;
+    std:: cout << "without offset" << get_page_index (n1) << std::endl;
     std:: cout << "table_index 0 of" << n1 << ": " << get_table_value(n1, 0) << std::endl;
     std:: cout << "table_index 1 of" << n1 << ": " << get_table_value(n1, 1) << std::endl;
     std:: cout << "table_index 2 of" << n1 << ": " << get_table_value(n1, 2) << std::endl;
