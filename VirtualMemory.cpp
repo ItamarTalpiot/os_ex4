@@ -206,7 +206,7 @@ word_t get_physical_page(uint64_t virtualAddress){
   word_t last_addr = 0;
   for(int i = 0; i < TABLES_DEPTH; i++){
       cur_part_of_vir_addr = get_table_value (virtualAddress, i);
-      PMread (cur_part_of_vir_addr, &cur_addr);
+      PMread (last_addr * PAGE_SIZE + cur_part_of_vir_addr, &cur_addr);
       if(cur_addr == 0){
           cur_addr = get_frame(i == TABLES_DEPTH - 1 ? 1:0, get_page_index (virtualAddress), last_addr);
           PMwrite(last_addr * PAGE_SIZE + cur_part_of_vir_addr, cur_addr);
