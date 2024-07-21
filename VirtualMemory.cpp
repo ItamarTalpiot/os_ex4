@@ -9,3 +9,10 @@ void VMinitialize()
         PMwrite(i, 0);
     }
 }
+
+
+
+int VMwrite(uint64_t virtualAddress, word_t value)
+{
+
+}
