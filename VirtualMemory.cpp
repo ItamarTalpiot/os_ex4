@@ -10,7 +10,7 @@ void print_bytes(uint64_t virtualAddress) {
         uint64_t bit = (virtualAddress >> i) & 1;
         std::cout << bit;
     }
-//    std::cout << std::endl;
+    std::cout << std::endl;
 }
 
 uint64_t get_table_value(uint64_t virtualAddress, int table_index)
@@ -21,6 +21,11 @@ uint64_t get_table_value(uint64_t virtualAddress, int table_index)
 //    std::cout << "shited ";
     print_bytes(shifted_addr);
     return  shifted_addr & mask; // Return the last OFFSET_WIDTH bits of the virtualAddress
+}
+
+uint64_t get_frame_index(uint64_t virtualAddress)
+{
+    return  virtualAddress >> OFFSET_WIDTH; // Return the last OFFSET_WIDTH bits of the virtualAddress
 }
 
 uint64_t generateBitPattern(int offsetWidth) {
@@ -87,15 +92,16 @@ int VMread(uint64_t virtualAddress, word_t* value){
 }
 
 
-//int main(int argc, char **argv) {
-//    uint64_t n1 = 100 + (uint64_t)(1ULL << 18);
-//    print_bytes(n1);
-//    std:: cout << "Table depth " << TABLES_DEPTH << std::endl;
-//    std:: cout << "table_index 0 of" << n1 << ": " << get_table_value(n1, 0) << std::endl;
-//    std:: cout << "table_index 1 of" << n1 << ": " << get_table_value(n1, 1) << std::endl;
-//    std:: cout << "table_index 2 of" << n1 << ": " << get_table_value(n1, 2) << std::endl;
-//    std:: cout << "table_index 3 of" << n1 << ": " << get_table_value(n1, 3) << std::endl;
-//    std:: cout << "table_index 4 of" << n1 << ": " << get_table_value(n1, 4) << std::endl;
-//
-//    return 0;
-//}
+int main(int argc, char **argv) {
+    uint64_t n1 = 100 + (uint64_t)(1ULL << 18);
+    print_bytes(n1);
+    std:: cout << "Table depth " << TABLES_DEPTH << std::endl;
+    std:: cout << "without offset" << get_frame_index(n1) << std::endl;
+    std:: cout << "table_index 0 of" << n1 << ": " << get_table_value(n1, 0) << std::endl;
+    std:: cout << "table_index 1 of" << n1 << ": " << get_table_value(n1, 1) << std::endl;
+    std:: cout << "table_index 2 of" << n1 << ": " << get_table_value(n1, 2) << std::endl;
+    std:: cout << "table_index 3 of" << n1 << ": " << get_table_value(n1, 3) << std::endl;
+    std:: cout << "table_index 4 of" << n1 << ": " << get_table_value(n1, 4) << std::endl;
+
+    return 0;
+}
