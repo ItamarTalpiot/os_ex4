@@ -65,7 +65,63 @@ void put_in_frame_zeros(word_t frame_index){
 }
 
 
+word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int height)
+{
+    if (curr_frame_index != frame_not_to_evict && is_there_only_zero_in_frame(curr_frame_index))
+    {
+        return curr_frame_index;
+    }
+    else if (height == TABLES_DEPTH)
+    {
+        return 0;
+    }
+
+    word_t pointing_index;
+    word_t found_frame_index = 0;
+    for (int i = 0; i < PAGE_SIZE; i++)
+    {
+        PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
+        found_frame_index = found_frame_index ? found_frame_index : get_frame_dfs(frame_not_to_evict, pointing_index, height + 1);
+    }
+
+    return found_frame_index;
+}
+
+int get_num_of_frames(word_t curr_frame_index, int height)
+{
+    if (height == TABLES_DEPTH)
+    {
+        return 1;
+    }
+
+    word_t pointing_index;
+    int total_num = 0;
+    for (int i = 0; i < PAGE_SIZE; i++)
+    {
+        PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
+        total_num += get_num_of_frames(pointing_index, height + 1);
+    }
+
+    return total_num + 1;
+}
+
+
 word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evict){
+    word_t found_frame = get_frame_dfs(frame_not_to_evict, 0, 0);
+
+    if (found_frame != 0)
+    {
+        if (is_next_data)
+        {
+            PMrestore(found_frame, page_index);
+        }
+        else
+        {
+            put_in_frame_zeros(found_frame);
+        }
+
+        return found_frame;
+    }
 
 }
 
