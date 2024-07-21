@@ -48,6 +48,7 @@
 .idea/
 # AWS User-specific
 .idea/**/aws.xml
+CMakeLists.txt
 
 # Generated files
 .idea/**/contentModel.xml
