@@ -54,7 +54,6 @@ bool is_there_only_zero_in_frame(word_t frame_index){
   word_t var;
   for(int i = 0; i < PAGE_SIZE; i++){
     PMread (frame_index * PAGE_SIZE + i, &var);
-    std::cout << "var" << var << std::endl;
     if(var != 0){
       return false;
     }
@@ -125,7 +124,7 @@ int get_num_of_frames(word_t curr_frame_index, int height)
 {
     if (is_there_only_zero_in_frame(0))
     {
-        return 0;
+        return curr_frame_index == 0 ? 1 : 0;
     }
     else if (height == TABLES_DEPTH)
     {
@@ -138,7 +137,7 @@ int get_num_of_frames(word_t curr_frame_index, int height)
     {
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
 //        std::cout << pointing_index << std::endl;
-        std::cout << is_there_only_zero_in_frame(0) << std::endl;
+//        std::cout << is_there_only_zero_in_frame(0) << std::endl;
         total_num += get_num_of_frames(pointing_index, height + 1);
     }
 
@@ -213,6 +212,7 @@ word_t get_physical_page(uint64_t virtualAddress){
   word_t cur_addr;
   word_t last_addr = 0;
   for(int i = 0; i < TABLES_DEPTH; i++){
+      printRam();
       cur_part_of_vir_addr = get_table_value (virtualAddress, i);
       PMread (last_addr * PAGE_SIZE + cur_part_of_vir_addr, &cur_addr);
       if(cur_addr == 0){
@@ -226,7 +226,6 @@ word_t get_physical_page(uint64_t virtualAddress){
 
 int VMwrite(uint64_t virtualAddress, word_t value)
 {
-    printRam();
   word_t cur_addr = get_physical_page(virtualAddress);
   PMwrite(cur_addr * PAGE_SIZE + get_table_value (virtualAddress, TABLES_DEPTH), value);
   return 1;
