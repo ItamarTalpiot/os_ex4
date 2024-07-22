@@ -17,8 +17,6 @@ uint64_t get_table_value(uint64_t virtualAddress, int table_index)
 
     uint64_t mask = (1ULL << OFFSET_WIDTH) - 1; // Create a mask with the last OFFSET_WIDTH bits set to 1
     uint64_t shifted_addr = (virtualAddress >> OFFSET_WIDTH * (TABLES_DEPTH - table_index));
-//    std::cout << "shited ";
-//    print_bytes(shifted_addr);
     return  shifted_addr & mask; // Return the last OFFSET_WIDTH bits of the virtualAddress
 }
 
@@ -68,15 +66,8 @@ word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int hei
     {
         return 0;
     }
-//    if (height == TABLES_DEPTH-1)
-//    {
-//        father = curr_frame_index*PAGE_SIZE;
-//    }
     if (curr_frame_index != frame_not_to_evict && is_there_only_zero_in_frame(curr_frame_index))
     {
-//        std::cout << "found frame " << curr_frame_index << "and not evict" << frame_not_to_evict << std::endl;
-        if (!(*father_address_res))
-            *father_address_res = father;
         return curr_frame_index;
     }
 
@@ -249,14 +240,10 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 
     //second option
     int num_frames = 0;
-//    int num_frames2 = get_num_of_frames(0, 0, &num_frames);
     get_max_frame_index(0, &num_frames, 0);
-//    printRam();
-//    std::cout << "num frames " << num_frames  << "    NUM_FRAMES: " << NUM_FRAMES << std::endl;
     if (num_frames+1 < NUM_FRAMES) // todo: check why not add + 1
     {
         found_frame = num_frames + 1;
-//        std::cout << "found second condition" << found_frame << std::endl;
 
         if (is_next_data)
         {
@@ -288,7 +275,6 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     }
     else
     {
-        //todo: maybe check if frame_not_to_evict
         put_in_frame_zeros(frame_res);
     }
 
@@ -300,11 +286,9 @@ word_t get_physical_page(uint64_t virtualAddress){
   word_t cur_addr;
   word_t last_addr = 0;
   for(int i = 0; i < TABLES_DEPTH; i++){
-//        printRam();
       cur_part_of_vir_addr = get_table_value (virtualAddress, i);
       PMread (last_addr * PAGE_SIZE + cur_part_of_vir_addr, &cur_addr);
       if(cur_addr == 0){
-//          printRam();
           cur_addr = get_frame(i == TABLES_DEPTH - 1 ? 1:0, get_page_index (virtualAddress), last_addr);
           PMwrite(last_addr * PAGE_SIZE + cur_part_of_vir_addr, cur_addr);
 
@@ -336,36 +320,3 @@ int VMread(uint64_t virtualAddress, word_t* value){
   return 1;
 }
 
-
-//int main(int argc, char **argv)
-//{
-//    VMinitialize();
-//    VMwrite(13, 3);
-//    word_t val1;
-//    PMread(9, &val1);
-//    printRam();
-//    std::cout << "should be 3 val1: " << val1 << std::endl;
-//    word_t val2;
-//    VMread(13, &val2);
-//    std::cout << "should be 3 val2: " << val2 << std::endl;
-//
-//    word_t val3;
-//    VMread(6, &val3);
-//    std::cout << "should be <>> val3: " << val3 << std::endl;
-//    printRam();
-//
-//
-//    std::cout << "____________________" << std::endl;
-//    word_t val4;
-//    VMread(31, &val4);
-//    std::cout << "should be <>> val4: " << val4 << std::endl;
-//    printRam();
-////    for(uint64_t i = 0; i < 100; i++)
-////    {
-////        printf("writing i = %llu\n", (long long int) i);
-////        VMwrite(i * PAGE_SIZE, i);
-//////        int num_of_frames = get_num_of_frames (0, 0);
-//////        printRam();
-//////        printf("current num of frames = %d\n", num_of_frames);  }
-////    }
-//}
