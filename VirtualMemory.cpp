@@ -112,7 +112,7 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     word_t found_frame_index = 0;
     for (int i = 0; i < PAGE_SIZE; i++)
     {
-        std::cout << curr_p << std::endl;
+//        std::cout << curr_p << std::endl;
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
         if (pointing_index == 0)
         {
