@@ -87,24 +87,23 @@ word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int hei
 
 void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uint64_t page_swapped_in, uint64_t curr_p,word_t *frame_res, uint64_t *res_p, uint64_t *max_val, uint64_t father, uint64_t *father_address_res, int offset, int height)
 {
-    if (curr_frame_index == frame_not_to_evict)
-    {
-        return;
-    }
-    else if (height == TABLES_DEPTH - 1)
+    if (height == TABLES_DEPTH - 1)
     {
         father = curr_frame_index*PAGE_SIZE + offset;
     }
     else if (height == TABLES_DEPTH)
     {
-        uint64_t res = page_swapped_in > curr_p ? (page_swapped_in-curr_p) : (curr_p - page_swapped_in);
-        uint64_t tot_res = (NUM_PAGES - res) < res ? (NUM_PAGES - res) : res;
-        if (tot_res > *max_val)
+        if (curr_frame_index != frame_not_to_evict)
         {
-            *res_p = curr_p;
-            *max_val = tot_res;
-            *frame_res = curr_frame_index;
-            *father_address_res = father;
+            uint64_t res = page_swapped_in > curr_p ? (page_swapped_in-curr_p) : (curr_p - page_swapped_in);
+            uint64_t tot_res = (NUM_PAGES - res) < res ? (NUM_PAGES - res) : res;
+            if (tot_res > *max_val)
+            {
+                *res_p = curr_p;
+                *max_val = tot_res;
+                *frame_res = curr_frame_index;
+                *father_address_res = father;
+            }
         }
         return;
     }
@@ -113,7 +112,7 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     word_t found_frame_index = 0;
     for (int i = 0; i < PAGE_SIZE; i++)
     {
-//        std::cout << curr_p << std::endl;
+        std::cout << curr_p << std::endl;
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
         get_frame_max_point(frame_not_to_evict, pointing_index, page_swapped_in, (curr_p << OFFSET_WIDTH) + i, frame_res, res_p, max_val, father, father_address_res, i, height + 1);
     }
