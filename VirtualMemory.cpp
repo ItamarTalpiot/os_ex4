@@ -119,6 +119,25 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     }
 }
 
+void get_max_frame_index(word_t curr_frame_index ,word_t *cur_max_frame_index, int height){
+
+    word_t cur_value;  if (height == TABLES_DEPTH - 1){
+        for(int i = 0;i < PAGE_SIZE; i++){
+            PMread (curr_frame_index*PAGE_SIZE + i, &cur_value);
+            if (cur_value > *cur_max_frame_index)
+            {
+                *cur_max_frame_index = cur_value;
+            }
+        }
+        return;  }
+
+    for(int i = 0; i < PAGE_SIZE; i++){
+        PMread (curr_frame_index*PAGE_SIZE + i, &cur_value);      if (cur_value > *cur_max_frame_index){
+            *cur_max_frame_index = cur_value;      }
+        get_max_frame_index (cur_value, cur_max_frame_index, height + 1);  }
+}
+
+
 
 int get_num_of_frames(word_t curr_frame_index, int height)
 {
@@ -150,7 +169,45 @@ int get_num_of_frames(word_t curr_frame_index, int height)
         total_num += res;
     }
 
-    return total_num + 1;
+    return total_num;
+}
+
+int get_num_of_frames(word_t curr_frame_index, int height, int* max)
+{
+    if (height == TABLES_DEPTH)
+    {
+        if (curr_frame_index > *max)
+        {
+            *max = curr_frame_index;
+        }
+        return 1;
+    }
+    if (is_there_only_zero_in_frame(curr_frame_index))
+    {
+        return 0;
+    }
+
+    word_t pointing_index;
+    for (int i = 0; i < PAGE_SIZE; i++)
+    {
+        PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
+        if (pointing_index == 0){
+            continue;
+        }
+
+        if (pointing_index > *max)
+        {
+            *max = pointing_index;
+        }
+
+        int res = get_num_of_frames(pointing_index, height + 1);
+        if (res == 0)
+        {
+            continue;
+        }
+
+
+    }
 }
 
 
@@ -174,7 +231,10 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     }
 
     //second option
-    int num_frames = get_num_of_frames(0, 0);
+    int num_frames = 0;
+//    int num_frames2 = get_num_of_frames(0, 0, &num_frames);
+    get_max_frame_index(0, &num_frames, 0);
+//    printRam();
     std::cout << "num frames " << num_frames  << "    NUM_FRAMES: " << NUM_FRAMES << std::endl;
     if (num_frames+1 < NUM_FRAMES) // todo: check why not add + 1
     {
@@ -262,10 +322,10 @@ int VMread(uint64_t virtualAddress, word_t* value){
 
 int main(int argc, char **argv)
 {
-    VMinitialize();  for(uint64_t i = 0; i < 4; i++){
+    VMinitialize();  for(uint64_t i = 0; i < 100; i++){
         printf("writing i = %llu\n", (long long int)i);
         VMwrite(i*PAGE_SIZE, i);
         int num_of_frames = get_num_of_frames (0, 0);
-        printRam();
+//        printRam();
         printf("current num of frames = %d\n", num_of_frames);  }
 }
