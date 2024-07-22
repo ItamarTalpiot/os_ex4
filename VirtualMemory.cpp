@@ -1,20 +1,9 @@
 #include "VirtualMemory.h"
-#include "MemoryConstants.h"
 #include "PhysicalMemory.h"
-#include <iostream>
 
-
-void print_bytes(uint64_t virtualAddress) {
-    for (int i = VIRTUAL_ADDRESS_WIDTH-1; i >= 0; --i) {
-        uint64_t bit = (virtualAddress >> i) & 1;
-        std::cout << bit;
-    }
-    std::cout << std::endl;
-}
 
 uint64_t get_table_value(uint64_t virtualAddress, int table_index)
 {
-
     uint64_t mask = (1ULL << OFFSET_WIDTH) - 1; // Create a mask with the last OFFSET_WIDTH bits set to 1
     uint64_t shifted_addr = (virtualAddress >> OFFSET_WIDTH * (TABLES_DEPTH - table_index));
     return  shifted_addr & mask; // Return the last OFFSET_WIDTH bits of the virtualAddress
@@ -159,8 +148,7 @@ int get_num_of_frames(word_t curr_frame_index, int height)
     for (int i = 0; i < PAGE_SIZE; i++)
     {
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
-//        std::cout << pointing_index << std::endl;
-//        std::cout << is_there_only_zero_in_frame(0) << std::endl;
+
         if (pointing_index == 0){
             continue;
         }
@@ -223,7 +211,6 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 
     if (found_frame != 0)
     {
-//        std::cout << "found first condition" << " father res " << father_res  << std::endl;
 
         PMwrite(father_res, 0); //deleting parent
         if (is_next_data)
@@ -257,17 +244,15 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
         return found_frame;
     }
 
-//    std::cout << "finding third condition" << std::endl;
+
     uint64_t max_val = 0;
     word_t frame_res = 0;
     uint64_t res_p = 0;
     get_frame_max_point(frame_not_to_evict, 0, page_index, 0, &frame_res, &res_p, &max_val, father, &father_res, 0, 0);
 
-//    std::cout << "frame res: " << frame_res << " res_p: " << res_p << " father res: " << father_res << std::endl;
     PMevict(frame_res, res_p);
 
 
-//    PMwrite(frame_res, 0); //writing 0 to father
     PMwrite(father_res, 0); //writing 0 to father
     if (is_next_data)
     {
