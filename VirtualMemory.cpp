@@ -322,10 +322,13 @@ int VMread(uint64_t virtualAddress, word_t* value){
 
 int main(int argc, char **argv)
 {
-    VMinitialize();  for(uint64_t i = 0; i < 100; i++){
-        printf("writing i = %llu\n", (long long int)i);
-        VMwrite(i*PAGE_SIZE, i);
-        int num_of_frames = get_num_of_frames (0, 0);
+    VMinitialize();
+    for(uint64_t i = 0; i < 100; i++)
+    {
+        printf("writing i = %llu\n", (long long int) i);
+        VMwrite(i * PAGE_SIZE, i);
+//        int num_of_frames = get_num_of_frames (0, 0);
 //        printRam();
-        printf("current num of frames = %d\n", num_of_frames);  }
+//        printf("current num of frames = %d\n", num_of_frames);  }
+    }
 }
