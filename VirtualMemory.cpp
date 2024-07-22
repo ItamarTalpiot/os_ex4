@@ -98,7 +98,7 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     else if (height == TABLES_DEPTH)
     {
         uint64_t res = page_swapped_in > curr_p ? page_swapped_in-curr_p : curr_p - page_swapped_in;
-        uint64_t tot_res = NUM_PAGES - res < res ? NUM_PAGES - res : res;
+        uint64_t tot_res = (NUM_PAGES - res) < res ? (NUM_PAGES - res) : res;
         if (tot_res > *max_val)
         {
             *res_p = curr_p;
