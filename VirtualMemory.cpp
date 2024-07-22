@@ -64,13 +64,13 @@ bool is_there_only_zero_in_frame(word_t frame_index){
 
 word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int height)
 {
+    if (height == TABLES_DEPTH)
+    {
+        return 0;
+    }
     if (curr_frame_index != frame_not_to_evict && is_there_only_zero_in_frame(curr_frame_index))
     {
         return curr_frame_index;
-    }
-    else if (height == TABLES_DEPTH)
-    {
-        return 0;
     }
 
     word_t pointing_index;
@@ -323,12 +323,32 @@ int VMread(uint64_t virtualAddress, word_t* value){
 int main(int argc, char **argv)
 {
     VMinitialize();
-    for(uint64_t i = 0; i < 100; i++)
-    {
-        printf("writing i = %llu\n", (long long int) i);
-        VMwrite(i * PAGE_SIZE, i);
-//        int num_of_frames = get_num_of_frames (0, 0);
-//        printRam();
-//        printf("current num of frames = %d\n", num_of_frames);  }
-    }
+    VMwrite(13, 3);
+    word_t val1;
+    PMread(9, &val1);
+    printRam();
+    std::cout << "should be 3 val1: " << val1 << std::endl;
+    word_t val2;
+    VMread(13, &val2);
+    std::cout << "should be 3 val2: " << val2 << std::endl;
+
+    word_t val3;
+    VMread(6, &val3);
+    std::cout << "should be <>> val3: " << val3 << std::endl;
+    printRam();
+
+
+    std::cout << "____________________" << std::endl;
+    word_t val4;
+    VMread(31, &val4);
+    std::cout << "should be <>> val4: " << val4 << std::endl;
+    printRam();
+//    for(uint64_t i = 0; i < 100; i++)
+//    {
+//        printf("writing i = %llu\n", (long long int) i);
+//        VMwrite(i * PAGE_SIZE, i);
+////        int num_of_frames = get_num_of_frames (0, 0);
+////        printRam();
+////        printf("current num of frames = %d\n", num_of_frames);  }
+//    }
 }
