@@ -62,14 +62,21 @@ bool is_there_only_zero_in_frame(word_t frame_index){
 }
 
 
-word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int height)
+word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int height, uint64_t *father_address_res, uint64_t father)
 {
     if (height == TABLES_DEPTH)
     {
         return 0;
     }
+//    if (height == TABLES_DEPTH-1)
+//    {
+//        father = curr_frame_index*PAGE_SIZE;
+//    }
     if (curr_frame_index != frame_not_to_evict && is_there_only_zero_in_frame(curr_frame_index))
     {
+        std::cout << "found frame " << curr_frame_index << "and not evict" << frame_not_to_evict << std::endl;
+        if (!(*father_address_res))
+            *father_address_res = father;
         return curr_frame_index;
     }
 
@@ -82,7 +89,7 @@ word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int hei
         {
             continue;
         }
-        found_frame_index = found_frame_index ? found_frame_index : get_frame_dfs(frame_not_to_evict, pointing_index, height + 1);
+        found_frame_index = found_frame_index ? found_frame_index : get_frame_dfs(frame_not_to_evict, pointing_index, height + 1, father_address_res, curr_frame_index*PAGE_SIZE + i);
     }
 
     return found_frame_index;
@@ -93,7 +100,7 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
 {
     if (height == TABLES_DEPTH - 1)
     {
-        father = curr_frame_index*PAGE_SIZE + offset;
+        father = curr_frame_index*PAGE_SIZE;
     }
     else if (height == TABLES_DEPTH)
     {
@@ -106,7 +113,7 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
                 *res_p = curr_p;
                 *max_val = tot_res;
                 *frame_res = curr_frame_index;
-                *father_address_res = father;
+                *father_address_res = father + offset;
             }
         }
         return;
@@ -220,11 +227,15 @@ int get_num_of_frames(word_t curr_frame_index, int height, int* max)
 
 word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evict){
     //first option
-    word_t found_frame = get_frame_dfs(frame_not_to_evict, 0, 0);
+    uint64_t father_res = 0;
+    uint64_t father;
+    word_t found_frame = get_frame_dfs(frame_not_to_evict, 0, 0, &father_res, father);
 
     if (found_frame != 0)
     {
-        std::cout << "found first condition" << std::endl;
+        std::cout << "found first condition" << " father res " << father_res  << std::endl;
+
+        PMwrite(father_res, 0); //deleting parent
         if (is_next_data)
         {
             PMrestore(found_frame, page_index);
@@ -263,8 +274,6 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     std::cout << "finding third condition" << std::endl;
     uint64_t max_val = 0;
     word_t frame_res = 0;
-    uint64_t father_res;
-    uint64_t father;
     uint64_t res_p = 0;
     get_frame_max_point(frame_not_to_evict, 0, page_index, 0, &frame_res, &res_p, &max_val, father, &father_res, 0, 0);
 
@@ -272,6 +281,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     PMevict(frame_res, res_p);
 
 
+//    PMwrite(frame_res, 0); //writing 0 to father
     PMwrite(father_res, 0); //writing 0 to father
     if (is_next_data)
     {
@@ -279,6 +289,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
     }
     else
     {
+        //todo: maybe check if frame_not_to_evict
         put_in_frame_zeros(frame_res);
     }
 
@@ -290,7 +301,7 @@ word_t get_physical_page(uint64_t virtualAddress){
   word_t cur_addr;
   word_t last_addr = 0;
   for(int i = 0; i < TABLES_DEPTH; i++){
-        printRam();
+//        printRam();
       cur_part_of_vir_addr = get_table_value (virtualAddress, i);
       PMread (last_addr * PAGE_SIZE + cur_part_of_vir_addr, &cur_addr);
       if(cur_addr == 0){
@@ -327,35 +338,35 @@ int VMread(uint64_t virtualAddress, word_t* value){
 }
 
 
-int main(int argc, char **argv)
-{
-    VMinitialize();
-    VMwrite(13, 3);
-    word_t val1;
-    PMread(9, &val1);
-    printRam();
-    std::cout << "should be 3 val1: " << val1 << std::endl;
-    word_t val2;
-    VMread(13, &val2);
-    std::cout << "should be 3 val2: " << val2 << std::endl;
-
-    word_t val3;
-    VMread(6, &val3);
-    std::cout << "should be <>> val3: " << val3 << std::endl;
-    printRam();
-
-
-    std::cout << "____________________" << std::endl;
-    word_t val4;
-    VMread(31, &val4);
-    std::cout << "should be <>> val4: " << val4 << std::endl;
-    printRam();
-//    for(uint64_t i = 0; i < 100; i++)
-//    {
-//        printf("writing i = %llu\n", (long long int) i);
-//        VMwrite(i * PAGE_SIZE, i);
-////        int num_of_frames = get_num_of_frames (0, 0);
-////        printRam();
-////        printf("current num of frames = %d\n", num_of_frames);  }
-//    }
-}
+//int main(int argc, char **argv)
+//{
+//    VMinitialize();
+//    VMwrite(13, 3);
+//    word_t val1;
+//    PMread(9, &val1);
+//    printRam();
+//    std::cout << "should be 3 val1: " << val1 << std::endl;
+//    word_t val2;
+//    VMread(13, &val2);
+//    std::cout << "should be 3 val2: " << val2 << std::endl;
+//
+//    word_t val3;
+//    VMread(6, &val3);
+//    std::cout << "should be <>> val3: " << val3 << std::endl;
+//    printRam();
+//
+//
+//    std::cout << "____________________" << std::endl;
+//    word_t val4;
+//    VMread(31, &val4);
+//    std::cout << "should be <>> val4: " << val4 << std::endl;
+//    printRam();
+////    for(uint64_t i = 0; i < 100; i++)
+////    {
+////        printf("writing i = %llu\n", (long long int) i);
+////        VMwrite(i * PAGE_SIZE, i);
+//////        int num_of_frames = get_num_of_frames (0, 0);
+//////        printRam();
+//////        printf("current num of frames = %d\n", num_of_frames);  }
+////    }
+//}
