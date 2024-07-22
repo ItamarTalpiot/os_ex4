@@ -78,6 +78,10 @@ word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int hei
     for (int i = 0; i < PAGE_SIZE; i++)
     {
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
+        if (pointing_index == 0)
+        {
+            continue;
+        }
         found_frame_index = found_frame_index ? found_frame_index : get_frame_dfs(frame_not_to_evict, pointing_index, height + 1);
     }
 
@@ -286,7 +290,7 @@ word_t get_physical_page(uint64_t virtualAddress){
   word_t cur_addr;
   word_t last_addr = 0;
   for(int i = 0; i < TABLES_DEPTH; i++){
-
+        printRam();
       cur_part_of_vir_addr = get_table_value (virtualAddress, i);
       PMread (last_addr * PAGE_SIZE + cur_part_of_vir_addr, &cur_addr);
       if(cur_addr == 0){
