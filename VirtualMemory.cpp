@@ -113,6 +113,10 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     for (int i = 0; i < PAGE_SIZE; i++)
     {
         std::cout << curr_p << std::endl;
+        if (pointing_index == 0)
+        {
+            continue;
+        }
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
         get_frame_max_point(frame_not_to_evict, pointing_index, page_swapped_in, (curr_p << OFFSET_WIDTH) + i, frame_res, res_p, max_val, father, father_address_res, i, height + 1);
     }
@@ -254,7 +258,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 
     std::cout << "finding third condition" << std::endl;
     uint64_t max_val = 0;
-    word_t frame_res;
+    word_t frame_res = 0;
     uint64_t father_res;
     uint64_t father;
     uint64_t res_p = 0;
