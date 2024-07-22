@@ -18,7 +18,7 @@ uint64_t get_table_value(uint64_t virtualAddress, int table_index)
     uint64_t mask = (1ULL << OFFSET_WIDTH) - 1; // Create a mask with the last OFFSET_WIDTH bits set to 1
     uint64_t shifted_addr = (virtualAddress >> OFFSET_WIDTH * (TABLES_DEPTH - table_index));
 //    std::cout << "shited ";
-    print_bytes(shifted_addr);
+//    print_bytes(shifted_addr);
     return  shifted_addr & mask; // Return the last OFFSET_WIDTH bits of the virtualAddress
 }
 
@@ -74,7 +74,7 @@ word_t get_frame_dfs(word_t frame_not_to_evict, word_t curr_frame_index, int hei
 //    }
     if (curr_frame_index != frame_not_to_evict && is_there_only_zero_in_frame(curr_frame_index))
     {
-        std::cout << "found frame " << curr_frame_index << "and not evict" << frame_not_to_evict << std::endl;
+//        std::cout << "found frame " << curr_frame_index << "and not evict" << frame_not_to_evict << std::endl;
         if (!(*father_address_res))
             *father_address_res = father;
         return curr_frame_index;
@@ -123,7 +123,6 @@ void get_frame_max_point(word_t frame_not_to_evict, word_t curr_frame_index, uin
     word_t found_frame_index = 0;
     for (int i = 0; i < PAGE_SIZE; i++)
     {
-//        std::cout << curr_p << std::endl;
         PMread(curr_frame_index*PAGE_SIZE + i, &pointing_index);
         if (pointing_index == 0)
         {
@@ -233,7 +232,7 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 
     if (found_frame != 0)
     {
-        std::cout << "found first condition" << " father res " << father_res  << std::endl;
+//        std::cout << "found first condition" << " father res " << father_res  << std::endl;
 
         PMwrite(father_res, 0); //deleting parent
         if (is_next_data)
@@ -253,11 +252,11 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
 //    int num_frames2 = get_num_of_frames(0, 0, &num_frames);
     get_max_frame_index(0, &num_frames, 0);
 //    printRam();
-    std::cout << "num frames " << num_frames  << "    NUM_FRAMES: " << NUM_FRAMES << std::endl;
+//    std::cout << "num frames " << num_frames  << "    NUM_FRAMES: " << NUM_FRAMES << std::endl;
     if (num_frames+1 < NUM_FRAMES) // todo: check why not add + 1
     {
         found_frame = num_frames + 1;
-        std::cout << "found second condition" << found_frame << std::endl;
+//        std::cout << "found second condition" << found_frame << std::endl;
 
         if (is_next_data)
         {
@@ -271,13 +270,13 @@ word_t get_frame(int is_next_data, uint64_t page_index, word_t frame_not_to_evic
         return found_frame;
     }
 
-    std::cout << "finding third condition" << std::endl;
+//    std::cout << "finding third condition" << std::endl;
     uint64_t max_val = 0;
     word_t frame_res = 0;
     uint64_t res_p = 0;
     get_frame_max_point(frame_not_to_evict, 0, page_index, 0, &frame_res, &res_p, &max_val, father, &father_res, 0, 0);
 
-    std::cout << "frame res: " << frame_res << " res_p: " << res_p << " father res: " << father_res << std::endl;
+//    std::cout << "frame res: " << frame_res << " res_p: " << res_p << " father res: " << father_res << std::endl;
     PMevict(frame_res, res_p);
 
 
